@@ -193,10 +193,17 @@ def edit():
     return render_template("index.html", processed_image=processed_relpath)
 
 if __name__ == '__main__':
+    from apscheduler.schedulers.background import BackgroundScheduler
+    import os
+
+    # Schedule cleanup jobs
     scheduler = BackgroundScheduler()
     scheduler.add_job(lambda: cleanup_uploads("uploads", 24), 'interval', hours=6)
     scheduler.add_job(lambda: cleanup_uploads("static/processed", 24), 'interval', hours=6)
     scheduler.start()
     print("[Scheduler] Cleanup jobs scheduled every 6 hours.")
 
-    app.run(debug=True)
+    # Run Flask app (production-friendly)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
+
