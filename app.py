@@ -30,6 +30,7 @@ PROCESSED_FOLDER = 'static/processed'
 ALLOWED_EXTENSIONS = {'png', 'webp', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB limit
 app.secret_key = 'super secret key'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['PROCESSED_FOLDER'] = PROCESSED_FOLDER
@@ -191,6 +192,13 @@ def edit():
             return redirect(url_for('home'))
 
     return render_template("index.html", processed_image=processed_relpath)
+
+from flask import jsonify
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    return "File too large! Please upload an image under 50 MB.", 413
+
 
 if __name__ == '__main__':
     from apscheduler.schedulers.background import BackgroundScheduler
